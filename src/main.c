@@ -4,6 +4,8 @@
 //#include <stdlib.h>
 //#include <unistd.h>
 
+//#define ctrl(x)           ((x) & 0x1f)
+
 bool running = false;
 char buffer[1024];
 int x;
@@ -16,6 +18,10 @@ void init(char *filename) {
 	FILE *fptr;
 	fptr = fopen(filename, "r");
 	initscr();
+	keypad(stdscr, TRUE);
+	cbreak();
+	noecho();
+	nonl();
 	while (fgets(buffer, sizeof(buffer), fptr)) {
 		printw(buffer, x, y);
 	}
@@ -30,7 +36,7 @@ int main(int argc, char **argv) {
 	//char *arg = *argv;
 	init(argv[1]);
 	while (running) {
-		char ch = getch();
+		int ch = getch();
 		//addch(ch);
 		if (ch == 'q') {
 			running = false;
@@ -38,5 +44,6 @@ int main(int argc, char **argv) {
 		ch = 0;
 		endwin();
 	}
+	endwin();
 
 }
