@@ -31,21 +31,7 @@ int x;
 int y;
 
 void init(char *filename) {
-	x = 0;
-	y = 0;
-	printf("hello\n");
-	FILE *fptr;
-	fptr = fopen(filename, "r");
-	initscr();
-	keypad(stdscr, TRUE);
-	cbreak();
-	noecho();
-	nonl();
-	while (fgets(buffer, sizeof(buffer), fptr)) {
-		printw(buffer, x, y);
-	}
-	fclose(fptr);
-	running = true;
+    clear();
 
     x = 0;
     y = 0;
@@ -99,6 +85,21 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
 }
 
 int main(int argc, char **argv) {
+    // printf("hello\n");
+    // char *arg = *argv;
+    vec2_t cursor = {0, 0};
+    mode_t mode = NORMAL;
+    initscr();
+    if (argc < 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return 0;
+    }
+    init(argv[1]);
+    keypad(stdscr, true);
+    cbreak();
+    noecho();
+    nonl();
+    curs_set(0);
 
     while (running) {
         char ch = getch();
