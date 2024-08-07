@@ -6,6 +6,8 @@
 // #include <stdlib.h>
 // #include <unistd.h>
 
+// #define ctrl(x) ((x) & 0x1f)
+
 // utility
 typedef struct vec2 {
     uint64_t x;
@@ -102,7 +104,7 @@ int main(int argc, char **argv) {
     curs_set(0);
 
     while (running) {
-        char ch = getch();
+        int ch = getch();
         // addch(ch);
         attroff(A_REVERSE);
         mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
