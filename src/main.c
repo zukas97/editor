@@ -43,7 +43,9 @@ void write(char *filename, vec2_t *cursor) {
 	for (int i = 0; i < LINES; i++) {
 		move(i, 0);
 		instr(buff);
+		buff[1023] = '\0';
 		fprintf(file, "%s\n", buff);
+		
 
 	}
 	fclose(file);
