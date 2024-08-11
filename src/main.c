@@ -50,7 +50,7 @@ void init(char *filename) {
 }
 
 void charInput(char ch, vec2_t *cursor, mode_t *mode) {
-	int c = inch();
+    int c = inch();
     switch (*mode) {
         case NORMAL:
             switch (ch) {
@@ -68,12 +68,12 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
                     break;
                 case 'l':
                     cursor->x += 1;
-		    break;
+                    break;
                 case 'R':
                     *mode = REPLACE;
                     break;
-		case 'i':
-		    *mode = INSERT;
+                case 'i':
+                    *mode = INSERT;
             }
             break;
         case REPLACE:
@@ -87,26 +87,29 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
                     break;
             }
             break;
-	case INSERT:
-	    switch (ch) {
-		    case 27:
-			*mode = NORMAL;
-			break;
-		    case 8:
-			mvdelch(y, x-1);
-			refresh();
-		    default:
-			if (c != ' '){
-				//cursor->x += 1;
-				mvinsch(cursor->y, cursor->x, ch);
-				refresh();
-			}
-			mvprintw(cursor->y, cursor->x, "%c", ch);
-			cursor->x += 1;
-			break;
-	    }
-	    break;
-
+        case INSERT:
+            switch (ch) {
+                case 27:
+                    *mode = NORMAL;
+                    break;
+                case 8:
+                    mvdelch(y, x - 1);
+                    refresh();
+                case 7:
+                    // this is backspace
+                    break;
+                default:
+                    printf("%d\n", ch);
+                    if (c != ' ') {
+                        // cursor->x += 1;
+                        mvinsch(cursor->y, cursor->x, ch);
+                        refresh();
+                    }
+                    mvprintw(cursor->y, cursor->x, "%c", ch);
+                    cursor->x += 1;
+                    break;
+            }
+            break;
     }
 }
 
