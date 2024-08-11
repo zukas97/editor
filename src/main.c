@@ -14,7 +14,6 @@ typedef struct vec2 {
     uint64_t y;
 } vec2_t;
 
-// so we can insert stuff
 typedef enum mode {
     NORMAL,
     INSERT,
@@ -23,33 +22,35 @@ typedef enum mode {
     // COMMAND,
 } mode_t;
 
-// dont use global variables lad
-// pass by reference or pass by value
-// it wont allow you to use the same variable name
-// and it causes a little bit much of overhead
 bool running = false;
-char buffer[1024];
-int x;
-int y;
 
 void init(char *filename) {
     clear();
-
-    x = 0;
-    y = 0;
+    char buffer[1024];
     FILE *fptr;
     fptr = fopen(filename, "r");
     while (fgets(buffer, sizeof(buffer), fptr)) {
-        // buffer doesnt contain a format string so x and y are just deleted
-        // your approach is correct though: print the lines
-        // printw does that for you already so you can actually remove x, y
-        printw(buffer, x, y);
+        printw(buffer, 0, 0);
     }
     fclose(fptr);
     running = true;
 }
 
-void charInput(char ch, vec2_t *cursor, mode_t *mode) {
+void write(char *filename, vec2_t *cursor) {
+	char buff[1024];
+	FILE* file;
+	file = fopen(filename, "w");
+	for (int i = 0; i < LINES; i++) {
+		move(i, 0);
+		instr(buff);
+		fprintf(file, "%s\n", buff);
+
+	}
+	fclose(file);
+
+}
+
+void charInput(char ch, vec2_t *cursor, mode_t *mode, char * filename) {
     int c = inch();
     switch (*mode) {
         case NORMAL:
@@ -74,6 +75,8 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
                     break;
                 case 'i':
                     *mode = INSERT;
+		case 'w':
+		    write(filename, cursor);
             }
             break;
         case REPLACE:
@@ -140,7 +143,7 @@ int main(int argc, char **argv) {
         // addch(ch);
         attroff(A_REVERSE);
         mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
-        charInput(ch, &cursor, &mode);
+        charInput(ch, &cursor, &mode, argv[1]);
         attron(A_REVERSE);
         mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
         attroff(A_REVERSE);
