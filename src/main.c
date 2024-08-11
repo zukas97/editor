@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 // #include <stdlib.h>
 // #include <unistd.h>
 
@@ -36,15 +37,16 @@ void init(char *filename) {
     running = true;
 }
 
-void write(char *filename, vec2_t *cursor) {
-	char buff[1024];
+void write(char *filename) {
+	char str[1024];
 	FILE* file;
 	file = fopen(filename, "w");
+	fseek(file, 0, SEEK_SET);
 	for (int i = 0; i < LINES; i++) {
 		move(i, 0);
-		instr(buff);
-		buff[1023] = '\0';
-		fprintf(file, "%s\n", buff);
+		instr(str);
+		str[1023] = '\0';
+		fprintf(file, "%s\n", str);
 		
 
 	}
@@ -78,7 +80,7 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode, char * filename) {
                 case 'i':
                     *mode = INSERT;
 		case 'w':
-		    write(filename, cursor);
+		    write(filename);
             }
             break;
         case REPLACE:
