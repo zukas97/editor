@@ -67,6 +67,7 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
                     break;
                 case 'l':
                     cursor->x += 1;
+		    break;
                 case 'R':
                     *mode = REPLACE;
                     break;
