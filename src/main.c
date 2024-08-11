@@ -97,7 +97,9 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
 			refresh();
 		    default:
 			if (c != ' '){
-				cursor->x += 1;
+				//cursor->x += 1;
+				mvinsch(cursor->y, cursor->x, ch);
+				refresh();
 			}
 			mvprintw(cursor->y, cursor->x, "%c", ch);
 			cursor->x += 1;
