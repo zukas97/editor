@@ -93,10 +93,15 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode) {
                     *mode = NORMAL;
                     break;
                 case 8:
-                    mvdelch(y, x - 1);
+                    mvdelch(cursor->y, cursor->x - 1);
+		    cursor->x -= 1;
                     refresh();
+		    break;
                 case 7:
                     // this is backspace
+                    mvdelch(cursor->y, cursor->x - 1);
+		    cursor->x -= 1;
+                    refresh();
                     break;
                 default:
                     printf("%d\n", ch);
