@@ -24,6 +24,7 @@ VPATH = .:src
 ###############################################################################
 # A recipe to make any out file, searched for in src path
 out/%.o : %.c
+	mkdir -p out
 	$(CC) $(CFLAGS) $(INC) $(LIB) -c $^ -o $@ $(LNK)
 
 # A recipe to make the app
