@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
 // #include <string.h>
 // #include <stdlib.h>
-// #include <unistd.h>
 
 #define ERROR(cond, msg) assert((printf("%s", (cond) ? msg : "\0"), cond))
 
@@ -29,10 +29,11 @@ void init(char *filename, bool *running) {
     char buffer[1024];
     FILE *fptr;
     fptr = fopen(filename, "r");
-    while (fgets(buffer, sizeof(buffer), fptr)) {
-        printw(buffer, 0, 0);
-    }
-    fclose(fptr);
+    if (fptr != NULL)
+	    while (fgets(buffer, sizeof(buffer), fptr)) {
+		printw(buffer, 0, 0);
+		fclose(fptr);
+	    }
     *running = true;
 }
 
@@ -41,12 +42,12 @@ void writeToFile(char *filename) {
     FILE *file;
     file = fopen(filename, "w");
     //ERROR(file, "file open failed\n");
-    //fseek(file, 0, SEEK_SET);
-        str[1023] = '\0';
+    fseek(file, 0, SEEK_SET);
     for (int i = 0; i < LINES; i++) {
         move(i, 0);
-        instr(str);
+	instr(str);
         fprintf(file, "%s\n", str);
+        str[1023] = '\0';
     }
     fclose(file);
 }
@@ -125,30 +126,31 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode, char *filename, bool *runn
 }
 
 int main(int argc, char **argv) {
-    bool running = false;
-    vec2_t cursor = {0, 0};
-    mode_t mode = NORMAL;
-    initscr();
-    if (argc < 2) {
-        printf("Usage: %s <filename>\n", argv[0]);
-        return 0;
-    }
-    init(argv[1], &running);
-    keypad(stdscr, true);
-    cbreak();
-    noecho();
-    nonl();
-    curs_set(0);
+	bool running = false;
+	vec2_t cursor = {0, 0};
+	mode_t mode = NORMAL;
+	initscr();
+	if (argc < 2) {
+	printf("Usage: %s <filename>\n", argv[0]);
+	return 0;
+	}
+	init(argv[1], &running);
+	
+	keypad(stdscr, true);
+	cbreak();
+	noecho();
+	nonl();
+	curs_set(0);
 
-    while (running) {
-        int ch = getch();
-        attroff(A_REVERSE);
-        mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
-        charInput(ch, &cursor, &mode, argv[1], &running);
-        attron(A_REVERSE);
-        mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
-        attroff(A_REVERSE);
-        ch = 0;
-    }
-    endwin();
+	while (running) {
+	int ch = getch();
+	attroff(A_REVERSE);
+	mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
+	charInput(ch, &cursor, &mode, argv[1], &running);
+	attron(A_REVERSE);
+	mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
+	attroff(A_REVERSE);
+	ch = 0;
+	}
+	endwin();
 }
