@@ -1,13 +1,15 @@
+#include <assert.h>
 #include <curses.h>
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
+// #include <string.h>
 // #include <stdlib.h>
 // #include <unistd.h>
 
 // #define ctrl(x) ((x) & 0x1f)
+#define ERROR(cond, msg) assert((printf("%s", (cond) ? msg : "\0"), cond))
 
 // utility
 typedef struct vec2 {
@@ -23,9 +25,7 @@ typedef enum mode {
     // COMMAND,
 } mode_t;
 
-bool running = false;
-
-void init(char *filename) {
+void init(char *filename, bool *running) {
     clear();
     char buffer[1024];
     FILE *fptr;
@@ -34,100 +34,101 @@ void init(char *filename) {
         printw(buffer, 0, 0);
     }
     fclose(fptr);
-    running = true;
+    *running = true;
 }
 
-void write(char *filename) {
-	char str[1024];
-	FILE* file;
-	file = fopen(filename, "w");
-	fseek(file, 0, SEEK_SET);
-	for (int i = 0; i < LINES; i++) {
-		move(i, 0);
-		instr(str);
-		str[1023] = '\0';
-		fprintf(file, "%s\n", str);
-		
-
-	}
-	fclose(file);
-
+void writeToFile(char *filename) {
+    char str[1024];
+    FILE *file;
+    file = fopen(filename, "w");
+    ERROR(file, "file open failed\n");
+    fseek(file, 0, SEEK_SET);
+    for (int i = 0; i < LINES; i++) {
+        move(i, 0);
+        instr(str);
+        str[1023] = '\0';
+        fprintf(file, "%s\n", str);
+    }
+    fclose(file);
 }
 
-void charInput(char ch, vec2_t *cursor, mode_t *mode, char * filename) {
+void charInput(char ch, vec2_t *cursor, mode_t *mode, char *filename, bool *running) {
     int c = inch();
     switch (*mode) {
-        case NORMAL:
-            switch (ch) {
-                case 'q':
-                    running = false;
-                    break;
-                case 'h':
-                    cursor->x -= 1;
-                    break;
-                case 'j':
-                    cursor->y += 1;
-                    break;
-                case 'k':
-                    cursor->y -= 1;
-                    break;
-                case 'l':
-                    cursor->x += 1;
-                    break;
-                case 'R':
-                    *mode = REPLACE;
-                    break;
-                case 'i':
-                    *mode = INSERT;
-		case 'w':
-		    write(filename);
-            }
+    case NORMAL:
+        switch (ch) {
+        case 'q':
+            *running = false;
             break;
-        case REPLACE:
-            switch (ch) {
-                case 27:
-                    *mode = NORMAL;
-                    break;
-                default:
-                    mvprintw(cursor->y, cursor->x, "%c", ch);
-                    cursor->x += 1;
-                    break;
-            }
+        case 'h':
+            cursor->x -= 1;
             break;
-        case INSERT:
-            switch (ch) {
-                case 27:
-                    *mode = NORMAL;
-                    break;
-                case 8:
-                    mvdelch(cursor->y, cursor->x - 1);
-		    cursor->x -= 1;
-                    refresh();
-		    break;
-                case 7:
-                    // this is backspace
-                    mvdelch(cursor->y, cursor->x - 1);
-		    cursor->x -= 1;
-                    refresh();
-                    break;
-                default:
-                    printf("%d\n", ch);
-                    if (c != ' ') {
-                        // cursor->x += 1;
-                        mvinsch(cursor->y, cursor->x, ch);
-                        refresh();
-                    }
-                    mvprintw(cursor->y, cursor->x, "%c", ch);
-                    cursor->x += 1;
-                    break;
-            }
+        case 'j':
+            cursor->y += 1;
             break;
+        case 'k':
+            cursor->y -= 1;
+            break;
+        case 'l':
+            cursor->x += 1;
+            break;
+        case 'R':
+            *mode = REPLACE;
+            break;
+        case 'i':
+            *mode = INSERT;
+            break;
+        case 'w':
+            writeToFile(filename);
+            break;
+        }
+        break;
+    case REPLACE:
+        switch (ch) {
+        case 27:
+            *mode = NORMAL;
+            break;
+        default:
+            mvprintw(cursor->y, cursor->x, "%c", ch);
+            cursor->x += 1;
+            break;
+        }
+        break;
+    case INSERT:
+        switch (ch) {
+        case 27:
+            *mode = NORMAL;
+            break;
+        case 8:
+            mvdelch(cursor->y, cursor->x - 1);
+            cursor->x -= 1;
+            refresh();
+            break;
+        case 7:
+            // this is backspace
+            mvdelch(cursor->y, cursor->x - 1);
+            cursor->x -= 1;
+            refresh();
+            break;
+        default:
+            printf("%d\n", ch);
+            if (c != ' ') {
+                // cursor->x += 1;
+                mvinsch(cursor->y, cursor->x, ch);
+                refresh();
+            }
+            mvprintw(cursor->y, cursor->x, "%c", ch);
+            cursor->x += 1;
+            break;
+        }
+        break;
     }
 }
 
 int main(int argc, char **argv) {
     // printf("hello\n");
     // char *arg = *argv;
+    bool running = false;
     vec2_t cursor = {0, 0};
     mode_t mode = NORMAL;
     initscr();
@@ -135,8 +136,8 @@ int main(int argc, char **argv) {
         printf("Usage: %s <filename>\n", argv[0]);
         return 0;
     }
-    init(argv[1]);
-    keypad(stdscr, true);
+    init(argv[1], &running);
+    keypad(stdscr, TRUE);
     cbreak();
     noecho();
     nonl();
@@ -147,7 +148,7 @@ int main(int argc, char **argv) {
         // addch(ch);
         attroff(A_REVERSE);
         mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
-        charInput(ch, &cursor, &mode, argv[1]);
+        charInput(ch, &cursor, &mode, argv[1], &running);
         attron(A_REVERSE);
         mvprintw(cursor.y, cursor.x, "%c", mvinch(cursor.y, cursor.x));
         attroff(A_REVERSE);
