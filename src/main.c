@@ -29,11 +29,13 @@ void init(char *filename, bool *running) {
     char buffer[1024];
     FILE *fptr;
     fptr = fopen(filename, "r");
-    if (fptr != NULL)
+    if (fptr != NULL) { 
 	    while (fgets(buffer, sizeof(buffer), fptr)) {
 		printw(buffer, 0, 0);
-		fclose(fptr);
 	    }
+	    fclose(fptr);
+    }
+
     *running = true;
 }
 
@@ -106,8 +108,9 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode, char *filename, bool *runn
 		    refresh();
 		    break;
 		case 10:
-		    mvprintw(cursor->y, cursor->x,"\n");
+		    //mvprintw(cursor->y, cursor->x,"\n");
 		    //cursor->y += 1;
+		    break;
 		default:
 		    //printf("%d\n", ch);
 		    if (c != ' ') {
