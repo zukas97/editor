@@ -29,13 +29,11 @@ void init(char *filename, bool *running) {
     char buffer[1024];
     FILE *fptr;
     fptr = fopen(filename, "r");
-    if (fptr != NULL) { 
+    if (fptr != NULL)
 	    while (fgets(buffer, sizeof(buffer), fptr)) {
 		printw(buffer, 0, 0);
 	    }
-	    fclose(fptr);
-    }
-
+		fclose(fptr);
     *running = true;
 }
 
@@ -45,9 +43,19 @@ void writeToFile(char *filename) {
     file = fopen(filename, "w");
     //ERROR(file, "file open failed\n");
     fseek(file, 0, SEEK_SET);
+    int x;
     for (int i = 0; i < LINES; i++) {
+
         move(i, 0);
-	instr(str);
+	while (true) {
+		int k = 0;
+		char cch = inch();
+		if (cch == '\n' || cch == '\0') break;
+		str[k++] = cch;
+		move(i, x);
+		x++;
+		
+	}
         fprintf(file, "%s\n", str);
         str[1023] = '\0';
     }
@@ -108,8 +116,8 @@ void charInput(char ch, vec2_t *cursor, mode_t *mode, char *filename, bool *runn
 		    refresh();
 		    break;
 		case 10:
-		    //mvprintw(cursor->y, cursor->x,"\n");
-		    //cursor->y += 1;
+		    mvprintw(cursor->y, cursor->x,"\n");
+		    cursor->y += 1;
 		    break;
 		default:
 		    //printf("%d\n", ch);
@@ -132,6 +140,7 @@ int main(int argc, char **argv) {
 	bool running = false;
 	vec2_t cursor = {0, 0};
 	mode_t mode = NORMAL;
+	//int line_num;
 	initscr();
 	if (argc < 2) {
 	printf("Usage: %s <filename>\n", argv[0]);
@@ -144,6 +153,7 @@ int main(int argc, char **argv) {
 	noecho();
 	nonl();
 	curs_set(0);
+	
 
 	while (running) {
 	int ch = getch();
