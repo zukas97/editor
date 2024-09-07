@@ -52,8 +52,12 @@ void writeToFile(char *filename) {
 		char cch = inch();
 		if (cch == '\n' || cch == '\0') break;
 		str[k++] = cch;
-		move(i, x);
+		if (x >= LINES) {
+			break;
+		}
 		x++;
+		move(i, x);
+
 		
 	}
         fprintf(file, "%s\n", str);
